@@ -16,3 +16,4 @@ token.json
 *.sqlite3
 *.db
 *.log
+PERSONAL_README.md
