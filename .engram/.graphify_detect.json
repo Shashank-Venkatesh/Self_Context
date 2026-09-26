@@ -1,0 +1,68 @@
+{
+  "files": {
+    "code": [
+      "src/self_context/__init__.py",
+      "src/self_context/cli.py",
+      "src/self_context/config.py",
+      "src/self_context/core/__init__.py",
+      "src/self_context/core/models.py",
+      "src/self_context/core/retrieval.py",
+      "src/self_context/core/storage.py",
+      "src/self_context/mcp/__init__.py",
+      "src/self_context/mcp/server.py",
+      "src/self_context/sources/__init__.py",
+      "src/self_context/sources/email/__init__.py",
+      "src/self_context/sources/email/ingestion.py",
+      "src/self_context/sources/email/models.py",
+      "src/self_context/sources/email/normalization.py",
+      "src/self_context/sources/email/providers.py",
+      "tests/conftest.py",
+      "tests/test_cli.py",
+      "tests/test_core.py",
+      "tests/test_email.py",
+      "tests/test_mcp.py"
+    ],
+    "document": [
+      "README.md",
+      "SETUP.md",
+      "TESTING.md",
+      "progress.md"
+    ],
+    "paper": [],
+    "image": [],
+    "video": []
+  },
+  "total_files": 24,
+  "total_words": 5912,
+  "needs_graph": false,
+  "warning": "Corpus is ~5,912 words - fits in a single context window. You may not need a graph.",
+  "skipped_sensitive": [],
+  "graphifyignore_patterns": 19,
+  "git": {
+    "source_owner": "git",
+    "source_hash": "7b22d8e3049797cbbfc532e25d9f8f76faa8771e",
+    "branches": [
+      "Documentation",
+      "Foundation",
+      "main"
+    ],
+    "max_commits": 200,
+    "active_within_days": 30
+  },
+  "scope": {
+    "requested_mode": "auto",
+    "resolved_mode": "committed",
+    "source": "default-auto",
+    "root": ".",
+    "git_root": ".",
+    "head": "7b22d8e3049797cbbfc532e25d9f8f76faa8771e",
+    "candidate_count": 28,
+    "included_count": 24,
+    "excluded_untracked_count": 8,
+    "excluded_ignored_count": 6038,
+    "excluded_sensitive_count": 0,
+    "missing_committed_count": 0,
+    "warnings": [],
+    "recommendation": "Use --scope all or graphify.yaml inputs.corpus for a knowledge-base folder."
+  }
+}

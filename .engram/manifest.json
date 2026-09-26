@@ -1,0 +1,98 @@
+{
+  "src/self_context/__init__.py": {
+    "mtime": 1790233851998.468,
+    "hash": "352ec3e16f9489cd403edc34068cfe95"
+  },
+  "src/self_context/cli.py": {
+    "mtime": 1790239751540.1033,
+    "hash": "582c109c5912a86dcd0cf42ff00399de"
+  },
+  "src/self_context/config.py": {
+    "mtime": 1790233851998.468,
+    "hash": "d358bc22b94b3435899b5b473fbac96f"
+  },
+  "src/self_context/core/__init__.py": {
+    "mtime": 1790233852000.897,
+    "hash": "e625ccbf4ce92c002041cb79907acc30"
+  },
+  "src/self_context/core/models.py": {
+    "mtime": 1790233851998.468,
+    "hash": "57a116812a4e0e4408e55284353adfbd"
+  },
+  "src/self_context/core/retrieval.py": {
+    "mtime": 1790233852000.897,
+    "hash": "05d080f19517d13da364ecac654cecf4"
+  },
+  "src/self_context/core/storage.py": {
+    "mtime": 1790233851998.468,
+    "hash": "4c0ab26b3be8830923dbc9c13c8e1396"
+  },
+  "src/self_context/mcp/__init__.py": {
+    "mtime": 1790233852003.897,
+    "hash": "cf545cccd64d8e2d11a4bbbb46affa4d"
+  },
+  "src/self_context/mcp/server.py": {
+    "mtime": 1790233852003.897,
+    "hash": "f99ddd30bc6ee11f7ff5967db3a3da52"
+  },
+  "src/self_context/sources/__init__.py": {
+    "mtime": 1790233852000.897,
+    "hash": "a9f8904ff8e76abd4e2d9b4b4b9fcf06"
+  },
+  "src/self_context/sources/email/__init__.py": {
+    "mtime": 1790233852000.897,
+    "hash": "807e414f0bce099f890412f0c2e76415"
+  },
+  "src/self_context/sources/email/ingestion.py": {
+    "mtime": 1790233852000.897,
+    "hash": "a875b9b1145a0e391d3b0e9c517bb7c9"
+  },
+  "src/self_context/sources/email/models.py": {
+    "mtime": 1790233852000.897,
+    "hash": "24d4f2258913f9bb25c7a6cf0354576f"
+  },
+  "src/self_context/sources/email/normalization.py": {
+    "mtime": 1790233852000.897,
+    "hash": "31c79672c56c5a3eda970b256715de9c"
+  },
+  "src/self_context/sources/email/providers.py": {
+    "mtime": 1790239751540.1033,
+    "hash": "42439da84a32387ec5ddafa138422cad"
+  },
+  "tests/conftest.py": {
+    "mtime": 1790233852003.897,
+    "hash": "59ee80ae4317e10e8bed870308dcd804"
+  },
+  "tests/test_cli.py": {
+    "mtime": 1790239751540.1033,
+    "hash": "05eb1e4571b3ab0a3e8d19c782692c09"
+  },
+  "tests/test_core.py": {
+    "mtime": 1790233852003.897,
+    "hash": "b1e00657bd03b9608aff2c08091c080e"
+  },
+  "tests/test_email.py": {
+    "mtime": 1790239751540.1033,
+    "hash": "bcd35a57b3f0cbf260e658ef7ccd7772"
+  },
+  "tests/test_mcp.py": {
+    "mtime": 1790233852004.8967,
+    "hash": "b097f029d7cb77d13201faecb74c04a2"
+  },
+  "README.md": {
+    "mtime": 1790239751540.1033,
+    "hash": "dc1d910c848511f1fd7b2ae4cb4e5d85"
+  },
+  "SETUP.md": {
+    "mtime": 1790334920675.7202,
+    "hash": "ee696409d0f879cf12594f42afc8a09e"
+  },
+  "TESTING.md": {
+    "mtime": 1790334920674.5588,
+    "hash": "744147f12fd4a7a23f14589232999b34"
+  },
+  "progress.md": {
+    "mtime": 1790334920674.5588,
+    "hash": "a6c6cdc2d46c59e57e8cef969e0084ae"
+  }
+}
