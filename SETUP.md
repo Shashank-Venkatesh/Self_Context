@@ -201,6 +201,14 @@ Use this configuration and replace the command path with the path on your machin
 }
 ```
 
+
+#### One-Click Install for Cursor
+You can also connect to Cursor with a single click using Cursor's MCP deep link:
+```text
+cursor://anysphere.cursor-deeplink/mcp/install?name=self-context&config=eyJjb21tYW5kIjogIi9ob21lL3NjYXR0ZXJ6ei9Eb2N1bWVudHMvUHJvamVjdHMvU2VsZl9Db250ZXh0Ly52ZW52L2Jpbi9zZWxmLWNvbnRleHQiLCAiYXJncyI6IFsibWNwIl19
+```
+*(Update the Base64-encoded config if running from a different directory path.)*
+
 The server provides:
 
 - `search_context`
