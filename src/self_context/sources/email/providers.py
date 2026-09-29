@@ -70,6 +70,12 @@ class GmailProvider:
             userId="me", id=message_id, format="full"
         ).execute()
 
+    def get_profile(self) -> dict[str, Any]:
+        if not self._service:
+            self.authenticate()
+        return self._service.users().getProfile(userId="me").execute()
+
+
     @staticmethod
     def decode_body(data: str | None) -> str:
         if not data:

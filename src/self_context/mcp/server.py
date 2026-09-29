@@ -30,6 +30,11 @@ def create_server(retrieval: RetrievalService) -> FastMCP:
         """Search locally indexed email context."""
         return [item.to_dict() for item in retrieval.search_emails(query)]
 
+    @server.tool()
+    def search_web(query: str) -> list[dict[str, Any]]:
+        """Search locally indexed web page context."""
+        return [item.to_dict() for item in retrieval.search_web(query)]
+
     @server.resource("context://item/{item_id}")
     def context_item_resource(item_id: str) -> str:
         """Read-only resource view of one context item."""
