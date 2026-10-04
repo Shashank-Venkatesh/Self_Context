@@ -1,6 +1,6 @@
 # Project Progress
 
-Last updated: 2026-09-25
+Last updated: 2026-09-28
 
 ## Project
 
@@ -22,7 +22,7 @@ The project is Python 3.11+, uses a `src/` layout, and exposes the `self-context
 - MCP tools are implemented for `search_context`, `get_context_item`, and `search_emails`; the read-only `context://item/<id>` resource is also implemented.
 - The repository contains automated tests for core storage/retrieval, email normalization/provider/ingestion behavior, CLI help, and MCP tool behavior.
 - `TESTING.md` now documents automated checks, isolated CLI smoke tests, Gmail OAuth acceptance testing, synchronization/retrieval checks, MCP checks, privacy checks, and the regression workflow.
-- `SETUP.md` now provides a simple first-run installation and usage guide for end users.
+- `SETUP.md` now provides a simple first-run installation and usage guide for end users, including manual JSON client configuration and a one-click Cursor MCP deep-link setup.
 - `PERSONAL_README.md` now provides a private, file-by-file architecture guide plus separate code-runtime and project-development workflows. It is intentionally ignored by Git.
 - `PERSONAL_README.md` now places optional YouTube topic links beside the architecture topics they explain instead of using a separate links section.
 
@@ -30,6 +30,7 @@ The project is Python 3.11+, uses a `src/` layout, and exposes the `self-context
 
 ### Documentation and testing guidance
 
+- Added one-click Cursor MCP install deep-link configuration to `SETUP.md` to streamline client integration alongside Claude Desktop and Cline manual configs.
 - Added `TESTING.md` with step-by-step instructions for setting up a development environment.
 - Documented the commands for running pytest, coverage, and Ruff.
 - Documented isolated CLI testing with temporary XDG directories.
@@ -54,7 +55,7 @@ Validation for the documentation change completed in this work session. The chec
 .venv/bin/ruff check src tests
 ```
 
-Results: `pytest -q` passed with 9 tests; Ruff completed with no violations. Coverage was not run separately because this documentation-only change does not alter executable code.
+Results: Documentation-only additions to `SETUP.md` and `progress.md`; `pytest -q` passed with 9 tests; Ruff completed with no violations.
 
 The Gmail OAuth and MCP client flows require manual environment-specific acceptance testing as described in `TESTING.md`.
 
@@ -71,6 +72,14 @@ Update this file whenever the codebase changes. Every entry must include:
 Do not mark a check as passing until it has actually been run. Keep the newest entry at the top of the log below.
 
 ## Progress Log
+
+### 2026-09-28
+
+- Files changed: `SETUP.md`, `progress.md`.
+- Behavior / documentation impact: Added user-friendly MCP setup documentation including the one-click Cursor deep link (`cursor://anysphere.cursor-deeplink/mcp/install?...`) and multi-client configuration guides (Claude Desktop, Cline, Cursor) to make integrating the local MCP server seamless.
+- Focused and full validation: Verified formatting and structure against existing docs. Ran linter and test suite.
+- Results: Documentation updated; tests and Ruff passing.
+- Follow-up: Continue extending context sources and refining MCP tool signatures as needed.
 
 ### 2026-09-25
 
