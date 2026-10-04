@@ -193,6 +193,22 @@ Self Context can also fetch and index web pages, restricted to an explicit domai
 
 Each `--domain` allows that exact domain and its subdomains; repeat `--url` and `--domain` to add more. URLs outside the allowlist are skipped and reported. Use `--timeout N` to change the per-request timeout in seconds (default 30). Re-running the same sync updates existing pages instead of duplicating them, because items are keyed by canonical URL.
 
+### Import local files
+
+Self Context can also index local markdown and text files:
+
+```bash
+.venv/bin/self-context sync files ~/notes
+```
+
+Point it at a directory or a single file. By default it includes `.md`, `.markdown`, `.txt`, `.rst`, and `.org` files; pass repeatable `--ext` options to change the set:
+
+```bash
+.venv/bin/self-context sync files ~/notes --ext .md --ext .rst
+```
+
+Dotfiles and common build or cache directories (`.git`, `.venv`, `node_modules`, `dist`, `__pycache__`) are skipped. Each file's title comes from YAML frontmatter or the first heading when present, otherwise from the filename. Re-running the same sync updates existing items instead of duplicating them, because items are keyed by each file's path relative to the synced root. Indexed files are searchable with `.venv/bin/self-context search` and have IDs of the form `file:<relative-path>`.
+
 ### Keep the folder up to date
 
 To easily refresh your data folder at any time, run:

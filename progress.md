@@ -98,6 +98,18 @@ Do not mark a check as passing until it has actually been run. Keep the newest e
 
 ## Progress Log
 
+### 2026-10-04 (Files Source Documentation)
+
+- Files changed: `README.md`, `SETUP.md`, `TESTING.md`, `progress.md`.
+- Behavior / documentation impact:
+  - Documented the local files source across the user-facing docs: added it to the architecture diagram, the CLI usage examples, the MCP retrieval notes, and the "Implemented" list in `README.md`.
+  - Removed the outdated `README.md` claim that `files` are "not implemented in this MVP".
+  - Added an "Import local files" walkthrough to `SETUP.md` covering directory/single-file sync, `--ext` filtering, skipped dotfiles/directories, title extraction, and idempotent re-sync.
+  - Added a "Files synchronization and retrieval" acceptance section to `TESTING.md`, renumbered the following sections, and listed `test_web.py`/`test_files.py` in the focused test modules.
+- Focused and full validation: Documentation-only change; no source code changed in this pass. Markdown structure (headings, code fences, cross-references) was reviewed by hand. The test suite and Ruff were not re-run because no code changed.
+- Results: The docs now match the implemented files source.
+- Follow-up: None.
+
 ### 2026-10-04 (Stacked PRs & Progress Sync)
 
 - Files changed: `progress.md` (documentation only; no source code changed in this pass).

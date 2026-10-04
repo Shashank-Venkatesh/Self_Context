@@ -43,11 +43,13 @@ For a focused change, run the closest test module first:
 ```bash
 .venv/bin/pytest -q tests/test_core.py
 .venv/bin/pytest -q tests/test_email.py
+.venv/bin/pytest -q tests/test_web.py
+.venv/bin/pytest -q tests/test_files.py
 .venv/bin/pytest -q tests/test_mcp.py
 .venv/bin/pytest -q tests/test_cli.py
 ```
 
-Coverage currently exercises SQLite CRUD/upsert and FTS retrieval, email MIME normalization, provider pagination, domain-query validation, ingestion idempotency, and MCP tool functions. The real OAuth browser flow and most CLI commands require the manual checks below.
+Coverage currently exercises SQLite CRUD/upsert and FTS retrieval, email MIME normalization, provider pagination, domain-query validation, ingestion idempotency, web and file source scanning/normalization, and MCP tool functions. The real OAuth browser flow and most CLI commands require the manual checks below.
 
 ## 3. Run lint checks
 
@@ -216,7 +218,59 @@ Search the imported pages:
 
 Verify that matching rows show a `web:<...>` identifier and the page title. Retrieve one result with `.venv/bin/self-context get web:<id>` and confirm the JSON contains the expected `id`, `source`, `type`, `title`, `content`, and `metadata` fields.
 
-## 8. MCP acceptance test
+## 8. Files synchronization and retrieval
+
+Files sync runs entirely against the local filesystem and needs no network access. Create a scratch directory of documents to index:
+
+```bash
+export FILES_ROOT="$TEST_ROOT/files"
+mkdir -p "$FILES_ROOT"
+printf '# Project notes\nRemember the release checklist.\n' > "$FILES_ROOT/notes.md"
+printf 'Plain text reminder\n' > "$FILES_ROOT/reminder.txt"
+```
+
+Sync the directory:
+
+```bash
+.venv/bin/self-context sync files "$FILES_ROOT"
+.venv/bin/self-context status
+```
+
+Verify that the sync reports the number of indexed files and that `status` reports the increased item count (the two sample files add two items).
+
+Confirm extension filtering and directory skipping in a separate directory so earlier indexes do not interfere:
+
+```bash
+export FILTER_ROOT="$TEST_ROOT/filter"
+mkdir -p "$FILTER_ROOT/.git"
+printf '# Keep me\n' > "$FILTER_ROOT/keep.md"
+printf 'skip me\n' > "$FILTER_ROOT/skip.png"
+printf '# hidden\n' > "$FILTER_ROOT/.git/config.md"
+.venv/bin/self-context sync files "$FILTER_ROOT" --ext .md
+```
+
+Verify that only `keep.md` is indexed: the `.png` file is excluded by `--ext .md` and files inside `.git` are skipped.
+
+Check idempotent re-sync of the first directory:
+
+```bash
+.venv/bin/self-context sync files "$FILES_ROOT"
+.venv/bin/self-context status
+```
+
+The item count for `$FILES_ROOT` must not grow; ingestion is keyed by the file's path relative to the synced root and updates the existing row.
+
+Search and retrieve the imported files:
+
+```bash
+.venv/bin/self-context search "release checklist"
+.venv/bin/self-context search --source file "reminder"
+.venv/bin/self-context get file:notes.md
+```
+
+Verify that matching rows show a `file:<relative-path>` identifier, that the title comes from the H1 heading or YAML frontmatter when present, and that `get` returns indented JSON with the expected `id`, `source`, `type`, `title`, `content`, and `metadata` fields.
+
+## 9. MCP acceptance test
 
 Configure an MCP-compatible client to launch the installed command:
 
@@ -244,6 +298,8 @@ From the MCP client, exercise each exposed operation:
 7. Read `context://item/<id>` for a known item. Confirm it returns the item representation.
 8. Read `context://item/missing`. Confirm the client receives a not-found error.
 
+When files have been synced, `search_context` with `source: "file"` should return the indexed file items; the MCP server exposes no dedicated file tool.
+
 Stop the client and verify that the CLI can still open the database afterward. The MCP server is read-only from its public interface and must not expose SQL or a public network listener.
 
 ### MCP setup commands
@@ -267,7 +323,7 @@ cat "$HOME/.cursor/mcp.json"
 
 Verify that the command exits 0, creates `~/.cursor/mcp.json` with the `self-context` entry, and reports the written path. Run the same install again and confirm the file still contains exactly one `self-context` entry. Pre-seed the file with another server entry and confirm the merge preserves it. Repeat for `claude` and `cline` if those clients are relevant. Restore `HOME` afterward.
 
-## 9. Privacy and filesystem checks
+## 10. Privacy and filesystem checks
 
 Run these checks after an authenticated sync:
 
@@ -292,7 +348,7 @@ rm -rf "$TEST_ROOT"
 unset TEST_ROOT XDG_CONFIG_HOME XDG_DATA_HOME XDG_CACHE_HOME SELF_CONTEXT_GMAIL_CREDENTIALS
 ```
 
-## 10. Regression checklist for every code change
+## 11. Regression checklist for every code change
 
 1. Update `progress.md` with the date, files changed, behavior changed, and validation performed.
 2. Run the focused test module for the changed area.

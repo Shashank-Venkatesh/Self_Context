@@ -15,9 +15,10 @@ Self Context is a Linux-first, local-first personal context library for AI. The 
 ```text
 Gmail API -> provider -> email ingestion -> normalization -> SQLite -> retrieval -> MCP -> AI client
 Web pages -> domain-filtered HTTP provider -> web ingestion -> normalization -> SQLite -> retrieval -> MCP -> AI client
+Local files -> file provider -> file ingestion -> normalization -> SQLite -> retrieval -> MCP -> AI client
 ```
 
-The generic `ContextItem` model and provider protocols keep sources separate from the core. Alongside Gmail, the MVP includes a domain-filtered web source that fetches and indexes pages from an explicit domain allowlist. Calendar, notes, files, GitHub, Slack, and browser history are not implemented in this MVP.
+The generic `ContextItem` model and provider protocols keep sources separate from the core. Alongside Gmail, the MVP includes a domain-filtered web source that fetches and indexes pages from an explicit domain allowlist, and a local files source that indexes markdown and text files from a directory or a single file. Calendar, notes, GitHub, Slack, and browser history are not implemented in this MVP.
 
 ## Installation
 
@@ -39,6 +40,7 @@ self-context config [--data-dir /path/to/folder]
 self-context auth gmail [--credentials /path/to/client_secret.json]
 self-context sync email [--domain company.com]
 self-context sync web --url https://example.com/page --domain example.com [--timeout 30]
+self-context sync files [PATH] [--ext .md] [--ext .txt]
 self-context update
 self-context search "project meeting"
 self-context get email:<gmail-message-id>
@@ -56,6 +58,14 @@ self-context sync web \
   --url https://docs.example.com/guide \
   --url https://blog.example.com/post \
   --domain example.com
+```
+
+`self-context sync files` indexes local markdown and text files from a directory or a single file. The default extensions are `.md`, `.markdown`, `.txt`, `.rst`, and `.org`; override them with repeatable `--ext` options. Dotfiles and common build or cache directories (`.git`, `.venv`, `node_modules`, `dist`, `__pycache__`) are skipped, and re-running the same sync updates existing items instead of duplicating them, because items are keyed by each file's path relative to the synced root. For example:
+
+```bash
+self-context sync files ~/notes
+self-context sync files ~/notes/blog/post.md
+self-context sync files ~/notes --ext .md --ext .rst
 ```
 
 Commands return a non-zero exit code for configuration, authentication, storage, and source failures. Normal output does not include email bodies or credentials.
@@ -106,6 +116,8 @@ The server exposes:
 - `search_web(query)`
 - read-only resource `context://item/<id>`
 
+There is no separate file tool; indexed file items are retrieved through `search_context` (filter with `source: "file"` or `type: "file"`) and `get_context_item` using their `file:<relative-path>` identifiers.
+
 `self-context mcp --print-config` prints the client configuration JSON without starting the server, and `self-context mcp --install claude|cline|cursor` merges the server entry directly into the chosen client's `mcpServers` configuration file.
 
 It does not expose SQL, filesystem, database mutation, or public network transports.
@@ -122,6 +134,7 @@ Email contents remain in the local database after Gmail synchronization. Self Co
 - Gmail OAuth using Google's official API client
 - Gmail pagination, MIME normalization, HTML-to-text conversion, and idempotent ingestion
 - Domain-filtered web page fetching, normalization, and idempotent ingestion keyed by canonical URL
+- Local files source: markdown and text file scanning, frontmatter/heading title extraction, and idempotent ingestion keyed by relative path
 - Click CLI for init, config, auth, sync, update, link, search, get, status, setup wizard, and MCP
 - MCP client setup helpers: `--print-config` output and `--install` merging for Claude Desktop, Cline, and Cursor
 - Local stdio MCP tools (including `search_web`) and a read-only context resource
