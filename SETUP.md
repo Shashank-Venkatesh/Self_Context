@@ -47,12 +47,24 @@ Check that the command is available:
 .venv/bin/self-context --version
 ```
 
-## 5. Initialize local storage
+## 5. Initialize local storage (or run setup wizard)
 
-Create the local configuration, data, and cache directories:
+You can run the interactive setup wizard which guides you through directory selection, authentication, domain filters, and MCP link generation:
+
+```bash
+.venv/bin/self-context setup
+```
+
+Or initialize manually:
 
 ```bash
 .venv/bin/self-context init
+```
+
+To store your scraped data in a custom folder, pass `--data-dir`:
+
+```bash
+.venv/bin/self-context init --data-dir /path/to/my-data
 ```
 
 Check the installation:
@@ -76,9 +88,15 @@ By default, files are stored here:
 - Database: `~/.local/share/self-context/context.sqlite3`
 - Cache: `~/.cache/self-context/`
 
-## 6. Optional: use different local directories
+## 6. Optional: select or change the data directory
 
-Set these variables before running the CLI if you want to keep the data somewhere else:
+Set the data directory at any time without environment variables:
+
+```bash
+.venv/bin/self-context config --data-dir /path/to/my-data
+```
+
+Or set standard XDG variables before running the CLI:
 
 ```bash
 export XDG_CONFIG_HOME="$HOME/.config"
@@ -162,6 +180,29 @@ Check how many items were imported:
 
 Run the same sync again when needed. Existing Gmail messages are updated instead of duplicated.
 
+### Import web pages
+
+Self Context can also fetch and index web pages, restricted to an explicit domain allowlist:
+
+```bash
+.venv/bin/self-context sync web \
+  --url https://docs.example.com/guide \
+  --url https://blog.example.com/post \
+  --domain example.com
+```
+
+Each `--domain` allows that exact domain and its subdomains; repeat `--url` and `--domain` to add more. URLs outside the allowlist are skipped and reported. Use `--timeout N` to change the per-request timeout in seconds (default 30). Re-running the same sync updates existing pages instead of duplicating them, because items are keyed by canonical URL.
+
+### Keep the folder up to date
+
+To easily refresh your data folder at any time, run:
+
+```bash
+.venv/bin/self-context update
+```
+
+This automatically applies your saved domain filters, fetches recent emails, and keeps the local SQLite database up to date.
+
 ## 9. Search and view imported context
 
 Search by keyword:
@@ -188,7 +229,18 @@ The search output shows the item ID and title. Use the ID from that output with 
 
 Self Context can provide local context to an MCP-compatible AI client.
 
-Use this configuration and replace the command path with the path on your machine:
+### Generate AI Connection Link & Configuration
+
+You can automatically generate your machine's exact connection link and configuration directly from the CLI:
+
+```bash
+.venv/bin/self-context link
+```
+*(or `.venv/bin/self-context mcp --link`)*
+
+This prints:
+1. The **Cursor One-Click Deep Link** with the correct paths encoded.
+2. The ready-to-copy JSON configuration for Claude Desktop and Cline:
 
 ```json
 {
@@ -202,6 +254,28 @@ Use this configuration and replace the command path with the path on your machin
 ```
 
 
+### Print or install the client configuration
+
+To print just the ready-to-copy JSON configuration without the deep link:
+
+```bash
+.venv/bin/self-context mcp --print-config
+```
+
+To merge the `self-context` server entry directly into a supported client's `mcpServers` configuration file:
+
+```bash
+.venv/bin/self-context mcp --install claude
+.venv/bin/self-context mcp --install cline
+.venv/bin/self-context mcp --install cursor
+```
+
+The install command preserves any existing entries in the client's config file and only adds or updates the `self-context` server. It writes to:
+
+- Claude Desktop: `~/.config/Claude/claude_desktop_config.json`
+- Cline: `~/.config/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json`
+- Cursor: `~/.cursor/mcp.json`
+
 #### One-Click Install for Cursor
 You can also connect to Cursor with a single click using Cursor's MCP deep link:
 ```text
@@ -214,6 +288,7 @@ The server provides:
 - `search_context`
 - `get_context_item`
 - `search_emails`
+- `search_web`
 - `context://item/<id>`
 
 The MCP server uses the same local database as the CLI and communicates over standard input/output.

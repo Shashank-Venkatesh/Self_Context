@@ -110,6 +110,24 @@ class ContextStore:
         rows = self._connection.execute(query_sql, params).fetchall()
         return [self._from_row(row) for row in rows]
 
+    def list_items(self, source: str | None = None, type: str | None = None,
+                   limit: int = 20) -> list[ContextItem]:
+        clauses: list[str] = []
+        params: list[object] = []
+        if source:
+            clauses.append("source = ?")
+            params.append(source)
+        if type:
+            clauses.append("type = ?")
+            params.append(type)
+        params.append(limit)
+        where_sql = f"WHERE {' AND '.join(clauses)} " if clauses else ""
+        rows = self._connection.execute(
+            f"SELECT * FROM context_items {where_sql}ORDER BY updated_at DESC LIMIT ?",
+            params,
+        ).fetchall()
+        return [self._from_row(row) for row in rows]
+
     def count(self) -> int:
         return int(self._connection.execute("SELECT COUNT(*) FROM context_items").fetchone()[0])
 

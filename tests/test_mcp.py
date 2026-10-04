@@ -19,3 +19,18 @@ def test_mcp_context_tools_search_and_get(store):
     assert search_result[0]["id"] == "email:1"
     assert email_result[0]["source"] == "email"
     assert item_result["title"] == "Project meeting"
+
+def test_mcp_search_web_tool(store):
+    now = datetime.now(timezone.utc)
+    store.add(ContextItem("web:https://example.com/a", "web", "https://example.com/a",
+                          "web", "Python tutorial", "learn python programming", {}, now, now, now))
+    store.add(ContextItem("email:1", "email", "1", "email", "Python meeting",
+                          "python discussion", {}, now, now, now))
+    server = create_server(RetrievalService(store))
+    tools = server._tool_manager._tools
+
+    results = tools["search_web"].fn("python")
+    assert len(results) == 1
+    assert results[0]["id"] == "web:https://example.com/a"
+    assert results[0]["source"] == "web"
+    assert results[0]["title"] == "Python tutorial"

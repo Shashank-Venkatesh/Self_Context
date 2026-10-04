@@ -15,5 +15,12 @@ class RetrievalService:
     def get_context_item(self, item_id: str) -> ContextItem | None:
         return self.store.get(item_id)
 
+    def list_items(self, source: str | None = None, type: str | None = None,
+                   limit: int = 20) -> list[ContextItem]:
+        return self.store.list_items(source=source, type=type, limit=limit)
+
     def search_emails(self, query: str) -> list[ContextItem]:
         return self.search_context(query, source="email")
+
+    def search_web(self, query: str) -> list[ContextItem]:
+        return self.search_context(query, source="web")

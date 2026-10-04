@@ -172,7 +172,51 @@ Retrieve one known result:
 
 Verify that the output is indented JSON containing the expected `id`, `source`, `source_id`, `type`, `title`, `content`, `metadata`, and timestamp fields. Confirm that the item content matches the source message and that no unrelated item is returned.
 
-## 7. MCP acceptance test
+## 7. Web synchronization and retrieval
+
+Web sync fetches pages over HTTP and requires network access to the target sites. Prefer a small site you control or a stable public page.
+
+Sync a page with a matching domain allowlist:
+
+```bash
+.venv/bin/self-context sync web \
+  --url https://example.com/ \
+  --domain example.com
+.venv/bin/self-context status
+```
+
+Verify that the sync reports `Synchronized 1 web page(s).` and that `status` reports the increased item count.
+
+Check the domain allowlist behavior:
+
+```bash
+.venv/bin/self-context sync web \
+  --url https://sub.example.com/page \
+  --url https://other-site.org/page \
+  --domain example.com
+```
+
+Verify that the subdomain URL is fetched, the `other-site.org` URL is reported as `Skipped (outside allowed domains):`, and only allowed pages are indexed. An invalid domain (for example `--domain 'not a domain'`) should exit non-zero with an error and create no items.
+
+Check idempotent re-sync:
+
+```bash
+.venv/bin/self-context sync web --url https://example.com/ --domain example.com
+.venv/bin/self-context status
+```
+
+The item count must not grow; ingestion is keyed by canonical URL and updates the existing row.
+
+Search the imported pages:
+
+```bash
+.venv/bin/self-context search "a known word from the page"
+.venv/bin/self-context search --source web "a known term"
+```
+
+Verify that matching rows show a `web:<...>` identifier and the page title. Retrieve one result with `.venv/bin/self-context get web:<id>` and confirm the JSON contains the expected `id`, `source`, `type`, `title`, `content`, and `metadata` fields.
+
+## 8. MCP acceptance test
 
 Configure an MCP-compatible client to launch the installed command:
 
@@ -194,14 +238,36 @@ From the MCP client, exercise each exposed operation:
 1. Call `search_context` with a known term. Confirm that matching context items are returned.
 2. Call `search_context` with `source: "email"` and `type: "email"`. Confirm the filters are applied.
 3. Call `search_emails` with a known term. Confirm that only email items are returned.
-4. Call `get_context_item` with a known `email:<id>`. Confirm the item is returned.
-5. Call `get_context_item` with an unknown ID. Confirm the result is `null`.
-6. Read `context://item/<id>` for a known item. Confirm it returns the item representation.
-7. Read `context://item/missing`. Confirm the client receives a not-found error.
+4. Call `search_web` with a known term from a synced page. Confirm that only web items are returned.
+5. Call `get_context_item` with a known `email:<id>`. Confirm the item is returned.
+6. Call `get_context_item` with an unknown ID. Confirm the result is `null`.
+7. Read `context://item/<id>` for a known item. Confirm it returns the item representation.
+8. Read `context://item/missing`. Confirm the client receives a not-found error.
 
 Stop the client and verify that the CLI can still open the database afterward. The MCP server is read-only from its public interface and must not expose SQL or a public network listener.
 
-## 8. Privacy and filesystem checks
+### MCP setup commands
+
+Verify the configuration helpers without starting the server:
+
+```bash
+.venv/bin/self-context mcp --print-config
+```
+
+Confirm it prints a JSON object with a `mcpServers.self-context` entry whose `command` is the absolute path to the installed `self-context` executable and whose `args` are `["mcp"]`, and that the server does not start.
+
+Test the install merge against a scratch config location by temporarily pointing `HOME` at a test directory:
+
+```bash
+export HOME="$TEST_ROOT/home"
+mkdir -p "$HOME"
+.venv/bin/self-context mcp --install cursor
+cat "$HOME/.cursor/mcp.json"
+```
+
+Verify that the command exits 0, creates `~/.cursor/mcp.json` with the `self-context` entry, and reports the written path. Run the same install again and confirm the file still contains exactly one `self-context` entry. Pre-seed the file with another server entry and confirm the merge preserves it. Repeat for `claude` and `cline` if those clients are relevant. Restore `HOME` afterward.
+
+## 9. Privacy and filesystem checks
 
 Run these checks after an authenticated sync:
 
@@ -226,7 +292,7 @@ rm -rf "$TEST_ROOT"
 unset TEST_ROOT XDG_CONFIG_HOME XDG_DATA_HOME XDG_CACHE_HOME SELF_CONTEXT_GMAIL_CREDENTIALS
 ```
 
-## 9. Regression checklist for every code change
+## 10. Regression checklist for every code change
 
 1. Update `progress.md` with the date, files changed, behavior changed, and validation performed.
 2. Run the focused test module for the changed area.
