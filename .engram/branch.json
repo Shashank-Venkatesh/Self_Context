@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "branchName": "Documentation",
+  "worktreePath": "/home/scatterzz/Documents/Projects/Self_Context",
+  "upstream": null,
+  "mergeBase": null,
+  "firstSeenHead": "7b22d8e3049797cbbfc532e25d9f8f76faa8771e",
+  "lastSeenHead": "7b22d8e3049797cbbfc532e25d9f8f76faa8771e",
+  "lastAnalyzedHead": "7b22d8e3049797cbbfc532e25d9f8f76faa8771e",
+  "stale": false,
+  "staleReason": null,
+  "staleSince": null,
+  "lifecycleEvent": null,
+  "createdAt": "2026-09-26T07:04:48.504Z",
+  "updatedAt": "2026-09-26T07:04:48.504Z"
+}
