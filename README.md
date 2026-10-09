@@ -14,9 +14,10 @@ Self Context is a Linux-first, local-first personal context library for AI. The 
 
 ```text
 Gmail API -> provider -> email ingestion -> normalization -> SQLite -> retrieval -> MCP -> AI client
+Web pages -> domain-filtered HTTP provider -> web ingestion -> normalization -> SQLite -> retrieval -> MCP -> AI client
 ```
 
-The generic `ContextItem` model and `EmailProvider` protocol keep future sources separate from the core. Calendar, notes, files, GitHub, Slack, and browser history are not implemented in this MVP.
+The generic `ContextItem` model and provider protocols keep sources separate from the core. Alongside Gmail, the MVP includes a domain-filtered web source that fetches and indexes pages from an explicit domain allowlist. Calendar, notes, files, GitHub, Slack, and browser history are not implemented in this MVP.
 
 ## Installation
 
@@ -32,18 +33,30 @@ For local development, the test and lint dependencies are included by the `dev` 
 ## CLI Usage
 
 ```bash
-self-context init
-self-context config
-self-context auth gmail
-self-context sync email --domain company.com
-self-context sync email --domain company.com --domain partner.org
+self-context setup
+self-context init [--data-dir /path/to/folder]
+self-context config [--data-dir /path/to/folder]
+self-context auth gmail [--credentials /path/to/client_secret.json]
+self-context sync email [--domain company.com]
+self-context sync web --url https://example.com/page --domain example.com [--timeout 30]
+self-context update
 self-context search "project meeting"
 self-context get email:<gmail-message-id>
 self-context status
+self-context link
 self-context mcp
 ```
 
-`self-context sync email --domain company.com` restricts Gmail's API search to messages involving that domain in `From`, `To`, `Cc`, or `Bcc`. Repeat `--domain` for multiple approved domains and combine it with Gmail queries such as `--query 'newer_than:7d'`. Without `--domain`, the command preserves the normal Gmail query behavior. Search also supports `self-context search --source email` and `self-context search --type email`.
+`self-context update` keeps the local context folder up to date with new data. `self-context link` generates AI MCP connection configurations (including a one-click install link for Cursor and JSON for Claude Desktop / Cline). `self-context sync email --domain company.com` restricts Gmail's API search to messages involving that domain. If run interactively without `--domain`, the CLI prompts for a domain or accepts all emails. Search also supports `self-context search --source email` and `self-context search --type email`.
+
+`self-context sync web` fetches and indexes web pages, but only from an explicit domain allowlist: each `--domain` allows that exact domain and its subdomains, and URLs outside the allowlist are skipped. Re-running the same sync is idempotent because items are keyed by canonical URL. For example:
+
+```bash
+self-context sync web \
+  --url https://docs.example.com/guide \
+  --url https://blog.example.com/post \
+  --domain example.com
+```
 
 Commands return a non-zero exit code for configuration, authentication, storage, and source failures. Normal output does not include email bodies or credentials.
 
@@ -90,7 +103,10 @@ The server exposes:
 - `search_context(query, source?, type?)`
 - `get_context_item(item_id)`
 - `search_emails(query)`
+- `search_web(query)`
 - read-only resource `context://item/<id>`
+
+`self-context mcp --print-config` prints the client configuration JSON without starting the server, and `self-context mcp --install claude|cline|cursor` merges the server entry directly into the chosen client's `mcpServers` configuration file.
 
 It does not expose SQL, filesystem, database mutation, or public network transports.
 
@@ -105,8 +121,10 @@ Email contents remain in the local database after Gmail synchronization. Self Co
 - FTS5 keyword search with source and type filters
 - Gmail OAuth using Google's official API client
 - Gmail pagination, MIME normalization, HTML-to-text conversion, and idempotent ingestion
-- Click CLI for init, config, auth, sync, search, get, status, and MCP
-- Local stdio MCP tools and a read-only context resource
+- Domain-filtered web page fetching, normalization, and idempotent ingestion keyed by canonical URL
+- Click CLI for init, config, auth, sync, update, link, search, get, status, setup wizard, and MCP
+- MCP client setup helpers: `--print-config` output and `--install` merging for Claude Desktop, Cline, and Cursor
+- Local stdio MCP tools (including `search_web`) and a read-only context resource
 - Automated tests that mock providers and require no Gmail credentials
 
 ## Future

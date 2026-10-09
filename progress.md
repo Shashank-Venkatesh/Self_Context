@@ -1,6 +1,6 @@
 # Project Progress
 
-Last updated: 2026-09-28
+Last updated: 2026-10-04
 
 ## Project
 
@@ -18,15 +18,40 @@ The project is Python 3.11+, uses a `src/` layout, and exposes the `self-context
 - Local SQLite storage, metadata, timestamps, CRUD/upsert, deletion, and FTS5 keyword search are implemented.
 - Gmail OAuth uses the official Gmail API client and stores the token locally with mode `600`.
 - Gmail pagination, MIME body decoding, HTML-to-text conversion, header decoding, domain filtering, and idempotent ingestion are implemented.
-- CLI commands are implemented for `init`, `config`, `auth gmail`, `sync email`, `search`, `get`, `status`, and `mcp`.
-- MCP tools are implemented for `search_context`, `get_context_item`, and `search_emails`; the read-only `context://item/<id>` resource is also implemented.
-- The repository contains automated tests for core storage/retrieval, email normalization/provider/ingestion behavior, CLI help, and MCP tool behavior.
+- A domain-filtered web source is implemented: `sync web` fetches pages over HTTP restricted to an explicit domain allowlist (exact domains and subdomains), normalizes them, and ingests them idempotently keyed by canonical URL.
+- A local files source is implemented: `sync files <path>` scans markdown/text files through `LocalFileProvider`, normalizes them, and upserts them idempotently keyed by `(source="file", relative_path)`, skipping dotfiles and ignored directories (`.git`, `.venv`, `node_modules`, `dist`, `__pycache__`).
+- CLI commands are implemented for `init`, `config`, `auth gmail`, `sync email`, `sync files`, `sync web`, `update`, `setup`, `link`, `mcp-link`, `search`, `list`, `get`, `delete`, `status`, and `mcp`.
+- MCP setup helpers are implemented: `mcp --print-config` prints the client configuration JSON, and `mcp --install claude|cline|cursor` merges the server entry into the chosen client's `mcpServers` config.
+- MCP tools are implemented for `search_context`, `get_context_item`, `search_emails`, and `search_web`; the read-only `context://item/<id>` resource is also implemented.
+- The repository contains automated tests for core storage/retrieval, email normalization/provider/ingestion behavior, web and file source behavior, CLI help, and MCP tool behavior.
 - `TESTING.md` now documents automated checks, isolated CLI smoke tests, Gmail OAuth acceptance testing, synchronization/retrieval checks, MCP checks, privacy checks, and the regression workflow.
 - `SETUP.md` now provides a simple first-run installation and usage guide for end users, including manual JSON client configuration and a one-click Cursor MCP deep-link setup.
 - `PERSONAL_README.md` now provides a private, file-by-file architecture guide plus separate code-runtime and project-development workflows. It is intentionally ignored by Git.
 - `PERSONAL_README.md` now places optional YouTube topic links beside the architecture topics they explain instead of using a separate links section.
 
+## Delivery (Pull Requests)
+
+The current work is delivered as a stacked pull-request chain. Each layer targets the branch directly beneath it, so merging bottom-up automatically retargets the next pull request in the chain:
+
+| Layer | Branch | Base branch | Pull request |
+| --- | --- | --- | --- |
+| 1 | `Foundation` | `main` | [#2](https://github.com/Shashank-Venkatesh/Self_Context/pull/2) |
+| 2 | `Documentation` | `Foundation` | [#3](https://github.com/Shashank-Venkatesh/Self_Context/pull/3) |
+| 3 | `Version_0.1` | `Documentation` | [#4](https://github.com/Shashank-Venkatesh/Self_Context/pull/4) |
+| 4 | `feature/web-source-mcp-setup` | `Version_0.1` | [#5](https://github.com/Shashank-Venkatesh/Self_Context/pull/5) |
+
+Pull request [#1](https://github.com/Shashank-Venkatesh/Self_Context/pull/1) (`copilot/build-initial-version-self-context` → `main`) is an independent bootstrap branch and is not part of this stack.
+
 ## Work Completed
+
+### Web source and MCP setup improvements
+
+- Added a domain-filtered web scraping source under `src/self_context/sources/web/` with an HTTP provider restricted to an explicit domain allowlist (exact domains and subdomains), page normalization, and idempotent ingestion keyed by canonical URL.
+- Added the `self-context sync web --url <url> --domain <domain> [--domain ...] [--timeout N]` CLI command; URLs outside the allowlist are skipped and reported.
+- Added `self-context mcp --print-config` and `self-context mcp --install claude|cline|cursor`, which merges the server entry into the client's `mcpServers` configuration while preserving existing entries.
+- Added the `search_web` MCP tool for searching locally indexed web page context.
+- Added a local files source (`sources/files/`) with a `sync files <path>` CLI command for indexing markdown/text files.
+- Updated `README.md`, `SETUP.md`, and `TESTING.md` to document the web source, the MCP setup commands, and the new tool.
 
 ### Documentation and testing guidance
 
@@ -47,7 +72,7 @@ The project is Python 3.11+, uses a `src/` layout, and exposes the `self-context
 
 ## Validation Status
 
-Validation for the documentation change completed in this work session. The checks were:
+Validation for the current codebase state was last run on 2026-10-04. The checks were:
 
 ```bash
 .venv/bin/pytest -q
@@ -55,7 +80,7 @@ Validation for the documentation change completed in this work session. The chec
 .venv/bin/ruff check src tests
 ```
 
-Results: Documentation-only additions to `SETUP.md` and `progress.md`; `pytest -q` passed with 9 tests; Ruff completed with no violations.
+Results: `pytest -q` passed with 44 tests; `pytest --cov=self_context` reported 80% total coverage; `ruff check src tests` completed with no violations.
 
 The Gmail OAuth and MCP client flows require manual environment-specific acceptance testing as described in `TESTING.md`.
 
@@ -72,6 +97,51 @@ Update this file whenever the codebase changes. Every entry must include:
 Do not mark a check as passing until it has actually been run. Keep the newest entry at the top of the log below.
 
 ## Progress Log
+
+### 2026-10-04 (Stacked PRs & Progress Sync)
+
+- Files changed: `progress.md` (documentation only; no source code changed in this pass).
+- Behavior / documentation impact:
+  - Published the `feature/web-source-mcp-setup` branch to `origin` and raised the remaining pull requests, completing the stacked delivery chain `main` → `Foundation` (#2) → `Documentation` (#3) → `Version_0.1` (#4) → `feature/web-source-mcp-setup` (#5). Each PR targets the branch directly beneath it.
+  - Refreshed the `Current State` list so the full CLI command set and the local files source are recorded accurately.
+  - Added a `Delivery (Pull Requests)` section documenting the stack.
+- Focused and full validation (run on this revision):
+  - `.venv/bin/python -m pytest -q`: 44 passed.
+  - `.venv/bin/python -m pytest --cov=self_context --cov-report=term`: 44 passed, 80% total coverage.
+  - `.venv/bin/python -m ruff check src tests`: all checks passed.
+  - Branch ancestry verified with `git merge-base --is-ancestor`; open PR heads/bases verified against the GitHub API.
+- Results: Stacked PRs raised; progress record synchronized to date.
+- Follow-up:
+  - Merge the stack bottom-up (#2 → #3 → #4 → #5), then run the live web-sync and MCP-install acceptance checks from `TESTING.md`.
+  - Known inconsistency: `README.md` still lists `files` as "not implemented in this MVP" while `sources/files/` and `sync files` are present in the code; reconcile the README wording.
+
+### 2026-09-29 (Web Source & MCP Setup)
+
+- Files changed: `README.md`, `SETUP.md`, `TESTING.md`, `progress.md` (documentation only; implementation in `src/self_context/sources/web/`, `src/self_context/cli.py`, and `src/self_context/mcp/server.py` was completed separately).
+- Behavior / documentation impact:
+  - Documented the new domain-filtered web source: `sync web --url <url> --domain <domain>` with exact-domain and subdomain allowlist matching, skip reporting, and idempotent re-syncs keyed by canonical URL.
+  - Documented `mcp --print-config` and `mcp --install claude|cline|cursor` alongside the existing manual JSON and Cursor deep-link instructions.
+  - Documented the new `search_web` MCP tool and added web sync and MCP setup acceptance steps to `TESTING.md`.
+- Focused and full validation: Documentation-only change; verified structure and tone against existing docs. Test suite and Ruff were not re-run because no code changed in this pass.
+- Results: Documentation updated.
+- Follow-up: Run the web sync and MCP install acceptance checks in `TESTING.md` against a live environment.
+
+### 2026-09-28 (Feature Enhancements & Testing)
+
+- Files changed: `src/self_context/config.py`, `src/self_context/cli.py`, `src/self_context/sources/email/providers.py`, `tests/test_cli.py`, `README.md`, `SETUP.md`, `progress.md`.
+- Behavior / documentation impact:
+  - Added user-selectable data directory storage via `--data-dir` on `init` and `config`, persisted in `config.json`.
+  - Added interactive prompt asking for target scraping domain if `--domain` is not provided.
+  - Added AI MCP connection link generation via `self-context link`, `self-context mcp-link`, and `self-context mcp --link` outputting Cursor deep links and MCP client JSON configurations.
+  - Added `self-context update` command to easily refresh the context folder and keep it up to date.
+  - Added interactive `self-context setup` wizard.
+  - Added `get_profile` to `GmailProvider` to show authenticated user's email.
+  - Expanded test suite with 6 new tests covering all CLI features.
+- Focused and full validation:
+  - Ran `ruff check src tests`: Passed (no violations).
+  - Ran `pytest -v --cov=self_context`: 15 passed in 0.36s (78% total coverage).
+- Results: All checks and tests passed.
+- Follow-up: Ready for end-user testing and additional context source plugins.
 
 ### 2026-09-28
 
